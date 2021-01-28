@@ -4,15 +4,14 @@ performance comparison of embedded databases in php.
 benchmark result
 -------------------
 
-![benchmark chart](./img/php_dba_functions_qdbm_cdb_bdb5.svg)  
+![benchmark chart](./img/php_embedded_db_benchmark.svg)  
 smaller is better.  
 PHP=7.4.3  
 
-||qdbm|cdb|db4(BerkeleyDB5)|
-|--|--|--|--|
-|read|156.201859|180.304518|4.378100872|
-|write|155.591542|98.49904013|6.337472916|
-
+||qdbm|cdb|db4(BerkeleyDB5)|SQLite3|SQLite3(:memory:)|SQLite3(tmpfs)|
+|--|--|--|--|--|--|--|
+|write|155.591542|98.49904013|6.337472916|1.99793601|0.3023738861|0.2330839634|
+|read|156.201859|180.304518|4.378100872|327.5866439|0.1585948467|1.440153122|
 
 how to run benchmark
 -------------------

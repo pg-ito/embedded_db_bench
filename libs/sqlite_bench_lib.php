@@ -25,11 +25,12 @@ class sqlite_benchmarker{
         }
         $values = [];
         stopwatch::start();
-        $stmt = $db->prepare("SELECT * FROM postal_code WHERE id=:id");
+        // $stmt = $db->prepare("SELECT * FROM postal_code WHERE id=:id");
         foreach($keys as $key){
-            $stmt->bindValue(':id', $key, SQLITE3_INTEGER);
+            // $stmt->bindValue(':id', $key, SQLITE3_INTEGER);
             // var_dump($stmt->getSQL(true));
-            $result = $stmt->execute();
+            // $result = $stmt->execute();
+            $result = $db->query("SELECT * FROM postal_code WHERE id={$key}");
             if($result === false){
                 print("read error: {$key}".PHP_EOL);
                 $db->close();
