@@ -4,15 +4,40 @@ performance comparison of embedded databases in php.
 benchmark result
 -------------------
 
-![benchmark chart](./img/php_embedded_db_benchmark.svg)  
+
 smaller is better.  
 PHP=7.4.3  
 
-||qdbm|cdb|db4(BerkeleyDB5)|SQLite3|SQLite3(:memory:)|SQLite3(tmpfs)|LevelDB|
-|--|--|--|--|--|--|--|--|
-|write|155.591542|98.49904013|6.337472916|1.99793601|0.3023738861|0.2330839634|22.959782123566|
-|read|156.201859|180.304518|4.378100872|327.5866439|0.1585948467|1.440153122|0.5493938923|
   
+
+### On Storage  
+
+|	|write|	read|
+|--|--|--|
+|qdbm|	155.591542|	156.201859|
+|cdb|	98.499040|	180.304518|
+|db4(BerkeleyDB5)|	6.337473|	4.378101|
+|SQLite3|	1.997936|	327.586644|
+|LevelDB|	22.959782|	0.549394|
+
+
+![benchmark chart](./img/php_embedded_db_benchmark_on_storage.svg)  
+
+
+### On Memory
+
+|   |write|read|
+|--|--|--|
+|qdbm(tmpfs)|0.418172|0.418172|
+|cdb(tmpfs)|0.215480|0.512907|
+|db4(BerkeleyDB5,tmpfs)|0.201170|0.103114|
+|SQLite3(:memory:)|0.302374|0.158595|
+|SQLite3(tmpfs)|0.233084|1.440153|
+|LevelDB(tmpfs)|0.249419|0.172687|
+
+
+![benchmark chart](./img/php_embedded_db_benchmark_on_memory.svg)  
+
 
 how to run benchmark
 -------------------
