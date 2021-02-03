@@ -1,8 +1,7 @@
 <?php
 
-$dbtype = $argv[1] ?? 'sqlite3';
-
-$optype = $argv[2] ?? 'rw';
+$optype = $argv[1] ?? 'rw';
+$base_path = $argv[2] ?? 'data/';
 
 require_once('libs/sqlite_bench_lib.php');
 
@@ -12,7 +11,7 @@ if($optype == 'w' || $optype == 'rw' || $optype == 'memory'){
 
 
 // path_builder::$base_path = realpath('./data').'/';
-path_builder::$base_path = '/mnt/wsl/';// tmpfs
+path_builder::$base_path = $base_path;// tmpfs
 $path = path_builder::build_db_fpath('sqlite3', 'db');
 if($optype == 'w' || $optype == 'rw'){
     sqlite_benchmarker::write($path);
