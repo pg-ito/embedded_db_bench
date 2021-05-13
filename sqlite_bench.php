@@ -2,12 +2,19 @@
 
 $optype = $argv[1] ?? 'rw';
 $base_path = $argv[2] ?? 'data/';
+$is_mmap = $argv[3] ?? '';
+
 
 require_once('libs/sqlite_bench_lib.php');
+
+if($is_mmap == 'mmap'){
+    sqlite_benchmarker::$use_mmap = true;
+}
 
 if($optype == 'w' || $optype == 'rw' || $optype == 'memory'){
     sqlite_benchmarker::write(':memory:', true);
 }
+
 
 
 // path_builder::$base_path = realpath('./data').'/';

@@ -3,7 +3,8 @@ require_once('stopwatch.php');
 require_once('libs/path_builder.php');
 
 class sqlite_benchmarker{
-
+    public static $use_mmap = false;
+    const PRAGMA_MMAP='PRAGMA mmap_size=1073741824;';
     /**
      * string $dbtype e.g. dbm, ndbm, gdbm, db2, db3, db4, cdb(cdb_make), flatfile, inifile, qdbm, tcadb, lmdb
      */
@@ -18,28 +19,36 @@ class sqlite_benchmarker{
             var_dump($db);
             return;
         }
-        // $db->exec('PRAGMA mmap_size=1073741824');
+        if(static::$use_mmap){
+            print('exec. '.static::PRAGMA_MMAP.PHP_EOL);
+            var_dump($db->exec(static::PRAGMA_MMAP));
+        }
+
         $keys = file($fpathkeys);
         foreach($keys as $k=>$v){
             $keys[$k] = trim($v);// trim eol
         }
         $values = [];
         stopwatch::start();
-        // $stmt = $db->prepare("SELECT * FROM postal_code WHERE id=:id");
+        $db->exec('BEGIN');
+        $stmt = $db->prepare("SELECT * FROM postal_code WHERE id=:id");
         foreach($keys as $key){
-            // $stmt->bindValue(':id', $key, SQLITE3_INTEGER);
+            $stmt->bindValue(':id', $key, SQLITE3_INTEGER);
             // var_dump($stmt->getSQL(true));
-            // $result = $stmt->execute();
-            $result = $db->query("SELECT * FROM postal_code WHERE id={$key}");
+            $result = $stmt->execute();
+            // $result = $db->query("SELECT * FROM postal_code WHERE id={$key}");
             if($result === false){
                 print("read error: {$key}".PHP_EOL);
+                $db->exec('ROLLBACK');
                 $db->close();
                 exit;
             }
             $values[] = $result->fetchArray(SQLITE3_ASSOC);
-            // var_dump($result->fetchArray(SQLITE3_ASSOC) );
         }
+
+        $db->exec('ROLLBACK');
         $elapsed = stopwatch::stop();
+        // var_dump($values);
         $count = count($keys);
         echo "dbtype: {$dbtype}, elapsed time: {$elapsed}, count: {$count}".PHP_EOL;
         $db->close();
@@ -63,6 +72,10 @@ class sqlite_benchmarker{
         if($db === false){
             var_dump($db);
             return;
+        }
+        if(static::$use_mmap){
+            print('exec. '.static::PRAGMA_MMAP.PHP_EOL);
+            var_dump($db->exec(static::PRAGMA_MMAP));
         }
         $db->exec('CREATE TABLE postal_code (id INTEGER PRIMARY KEY ,body TEXT)');
 
