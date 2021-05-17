@@ -4,6 +4,7 @@ require_once('libs/path_builder.php');
 
 class sqlite_benchmarker{
     public static $use_mmap = false;
+    public static $use_transaction = false;
     const PRAGMA_MMAP='PRAGMA mmap_size=1073741824;';
     /**
      * string $dbtype e.g. dbm, ndbm, gdbm, db2, db3, db4, cdb(cdb_make), flatfile, inifile, qdbm, tcadb, lmdb
@@ -30,7 +31,9 @@ class sqlite_benchmarker{
         }
         $values = [];
         stopwatch::start();
-        $db->exec('BEGIN');
+        if(static::$use_transaction){
+            $db->exec('BEGIN');
+        }
         $stmt = $db->prepare("SELECT * FROM postal_code WHERE id=:id");
         foreach($keys as $key){
             $stmt->bindValue(':id', $key, SQLITE3_INTEGER);
@@ -39,14 +42,17 @@ class sqlite_benchmarker{
             // $result = $db->query("SELECT * FROM postal_code WHERE id={$key}");
             if($result === false){
                 print("read error: {$key}".PHP_EOL);
-                $db->exec('ROLLBACK');
+                if(static::$use_transaction){
+                    $db->exec('ROLLBACK');
+                }
                 $db->close();
                 exit;
             }
             $values[] = $result->fetchArray(SQLITE3_ASSOC);
         }
-
-        $db->exec('ROLLBACK');
+        if(static::$use_transaction){
+            $db->exec('ROLLBACK');
+        }
         $elapsed = stopwatch::stop();
         // var_dump($values);
         $count = count($keys);
@@ -83,7 +89,9 @@ class sqlite_benchmarker{
         $data = json_decode( file_get_contents('data/postal_code.json') , true);
 
         stopwatch::start();
-        $db->exec('BEGIN');
+        if(static::$use_transaction){
+            $db->exec('BEGIN');
+        }
         $stmt = $db->prepare("INSERT INTO postal_code (id , body) VALUES (:id, :body)");
         foreach($data as $k=>$val){
             $valstr = json_encode($val,JSON_FORCE_OBJECT);
@@ -97,7 +105,9 @@ class sqlite_benchmarker{
             $result = $stmt->execute();
             if($result === false){
                 print("error: {$key}, {$valstr}".PHP_EOL);
-                $db->exec('ROLLBACK');
+                if(static::$use_transaction){
+                    $db->exec('ROLLBACK');
+                }
                 $db->close();
                 exit;
             }
@@ -105,7 +115,9 @@ class sqlite_benchmarker{
             $keys[] = $key;
         }
         $stmt->close();
-        $db->exec('COMMIT');
+        if(static::$use_transaction){
+            $db->exec('COMMIT');
+        }
         $elapsed = stopwatch::stop();
         // dba_optimize($dba);
         // dba_sync($dba);
